@@ -7,7 +7,7 @@ var weatherApiRootUrl = 'https://api.openweathermap.org';
 var weatherApiKey = 'd91f911bcf2c0f925fb6535547a5ddc9';
 var searchHistory = [];
 
-renderSearchHistory = () => {
+generateSearches = () => {
     searchInfo.innerHTML = '';
     for (var i = searchHistory.length - 1; i >= 0; i--) {
         var btn = document.createElement('button');
@@ -20,25 +20,24 @@ renderSearchHistory = () => {
     }
 }
 
-appendToHistory = (search) => {
+generateSearchHistory = (search) => {
     if (searchHistory.indexOf(search) !== -1) {
         return;
     }
     searchHistory.push(search);
-
     localStorage.setItem('search-history', JSON.stringify(searchHistory));
-    renderSearchHistory();
+    generateSearches();
 }
 
-initSearchHistory = () => {
+getHistory = () => {
     var storedHistory = localStorage.getItem('search-history');
     if (storedHistory) {
         searchHistory = JSON.parse(storedHistory);
     }
-    renderSearchHistory();
+    generateSearches();
 }
 
-renderCurrentWeather = (city, weather) => {
+generateWeather = (city, weather) => {
     var date = dayjs().format('M/D/YYYY');
     var tempF = weather.temp;
     var windMph = weather.wind_speed;
@@ -87,7 +86,7 @@ renderCurrentWeather = (city, weather) => {
     todayInfo.append(card);
 }
 
-renderForecastCard = (forecast) => {
+generateFiveDay = (forecast) => {
     var { humidity } = forecast;
     var windMph = forecast.wind_speed;
     var weatherIcon = document.createElement('img');
@@ -123,7 +122,7 @@ renderForecastCard = (forecast) => {
     forecastInfo.append(col);
 }
 
-renderForecast = (dailyForecast) => {
+generateForecast = (dailyForecast) => {
     var startDt = dayjs().add(1, 'day').startOf('day').unix();
     var endDt = dayjs().add(6, 'day').startOf('day').unix();
     var headingCol = document.createElement('div');
@@ -135,17 +134,17 @@ renderForecast = (dailyForecast) => {
     forecastInfo.append(headingCol);
     for (var i = 0; i < dailyForecast.length; i++) {
         if (dailyForecast[i].dt >= startDt && dailyForecast[i].dt < endDt) {
-            renderForecastCard(dailyForecast[i]);
+            generateFiveDay(dailyForecast[i]);
         }
     }
 }
 
-renderItems = (city, data) => {
-    renderCurrentWeather(city, data.current);
-    renderForecast(data.daily);
+generateList = (city, data) => {
+    generateWeather(city, data.current);
+    generateForecast(data.daily);
 }
 
-fetchWeather = (location) => {
+callWeatherAPI = (location) => {
     var { lat } = location;
     var { lon } = location;
     var city = location.name;
@@ -155,14 +154,14 @@ fetchWeather = (location) => {
             return res.json();
         })
         .then((data) => {
-            renderItems(city, data);
+            generateList(city, data);
         })
         .catch((err) => {
             console.error(err);
         });
 }
 
-fetchCoords = (search) => {
+callLocation = (search) => {
     var apiUrl = `${weatherApiRootUrl}/geo/1.0/direct?q=${search}&limit=5&appid=${weatherApiKey}`;
     fetch(apiUrl)
         .then((res) => {
@@ -172,8 +171,8 @@ fetchCoords = (search) => {
             if (!data[0]) {
                 alert('Location not found');
             } else {
-                appendToHistory(search);
-                fetchWeather(data[0]);
+                generateSearchHistory(search);
+                callWeatherAPI(data[0]);
             }
         })
         .catch((err) => {
@@ -181,25 +180,25 @@ fetchCoords = (search) => {
         });
 }
 
-handleSearchFormSubmit = (e) => {
+searchFormHandler = (e) => {
     if (!searchInput.value) {
         return;
     }
     e.preventDefault();
     var search = searchInput.value.trim();
-    fetchCoords(search);
+    callLocation(search);
     searchInput.value = '';
 }
 
-handleSearchHistoryClick = (e) => {
+searchHistoryHandler = (e) => {
     if (!e.target.matches('.btn-history')) {
         return;
     }
     var btn = e.target;
     var search = btn.getAttribute('data-search');
-    fetchCoords(search);
+    callLocation(search);
 }
 
-initSearchHistory();
-searchForm.addEventListener('submit', handleSearchFormSubmit);
-searchInfo.addEventListener('click', handleSearchHistoryClick);
+getHistory();
+searchForm.addEventListener('submit', searchFormHandler);
+searchInfo.addEventListener('click', searchHistoryHandler);
