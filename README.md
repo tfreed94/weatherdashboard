@@ -19,6 +19,6 @@ Any questions, comments, or concerns, please feel free to contact me at:
 
 * Email: tfreedwebdev94@gmail.com
 
-* Deployed App: 
+* Deployed App: https://tfreed94.github.io/weatherdashboard/
 
 
