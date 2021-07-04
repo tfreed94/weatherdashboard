@@ -88,20 +88,20 @@ renderCurrentWeather = (city, weather) => {
 }
 
 renderForecastCard = (forecast) => {
+    var { humidity } = forecast;
+    var windMph = forecast.wind_speed;
+    var weatherIcon = document.createElement('img');
+    var cardBody = document.createElement('div');
+    var tempEl = document.createElement('p');
+    var cardTitle = document.createElement('h5');
+    var card = document.createElement('div');
+    var windEl = document.createElement('p');
+    var humidityEl = document.createElement('p');
+    var col = document.createElement('div');
     var unixTs = forecast.dt;
     var iconUrl = `https://openweathermap.org/img/w/${forecast.weather[0].icon}.png`;
     var iconDescription = forecast.weather[0].description;
     var tempF = forecast.temp.day;
-    var { humidity } = forecast;
-    var windMph = forecast.wind_speed;
-    var col = document.createElement('div');
-    var card = document.createElement('div');
-    var cardBody = document.createElement('div');
-    var cardTitle = document.createElement('h5');
-    var weatherIcon = document.createElement('img');
-    var tempEl = document.createElement('p');
-    var windEl = document.createElement('p');
-    var humidityEl = document.createElement('p');
     col.append(card);
     card.append(cardBody);
     cardBody.append(cardTitle, weatherIcon, tempEl, windEl, humidityEl);
